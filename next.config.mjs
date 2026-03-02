@@ -12,9 +12,6 @@ const nextConfig = {
   // 1. CORE NEXT.JS OPTIMIZATIONS
   // ============================================
   
-  // SWC Minification (faster & better than Terser)
-  swcMinify: true,
-
   // Compression (gzip/brotli at server level)
   compress: true,
 
@@ -70,10 +67,6 @@ const nextConfig = {
     ],
     // Optimize CSS output
     optimizeCss: true,
-    // Reduce client bundle
-    optimizeClientBundles: true,
-    // Optimize unused CSS
-    optimizeClientBundlePrefetching: true,
   },
 
   // ============================================
@@ -162,26 +155,6 @@ const nextConfig = {
   // 5. CACHING HEADERS (Critical for Performance)
   // ============================================
   headers: async () => [
-    // HTML pages - Cache but revalidate frequently
-    {
-      source: '/:path*',
-      has: [
-        {
-          type: 'filetype',
-          filetype: ['html'],
-        },
-      ],
-      headers: [
-        {
-          key: 'Cache-Control',
-          value: 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
-        },
-        {
-          key: 'X-Content-Type-Options',
-          value: 'nosniff'
-        },
-      ]
-    },
     // All routes default caching
     {
       source: '/:path*',
@@ -273,8 +246,7 @@ const nextConfig = {
     pagesBufferLength: 3,
   },
 
-  // Output tracing for serverless optimization
-  outputFileTracing: true,
+
 
   // ============================================
   // 7. REDIRECTS & REWRITES FOR PERFORMANCE
