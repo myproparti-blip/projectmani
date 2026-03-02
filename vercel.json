@@ -4,7 +4,42 @@
   "env": {
     "NODE_ENV": "production"
   },
+  "functions": {
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "headers": [
+    {
+      "source": "/:path*",
+      "headers": [
+        {
+          "key": "cache-control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400, immutable"
+        },
+        {
+          "key": "x-content-type-options",
+          "value": "nosniff"
+        },
+        {
+          "key": "x-frame-options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "x-xss-protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "referrer-policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "permissions-policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
     {
       "source": "/images/:path*",
       "headers": [
@@ -28,7 +63,7 @@
       ]
     },
     {
-      "source": "/_next/image:path*",
+      "source": "/_next/image/:path*",
       "headers": [
         {
           "key": "cache-control",
@@ -64,7 +99,7 @@
       ]
     },
     {
-      "source": "/:path*\\.(woff|woff2)",
+      "source": "/:path*\\.(woff|woff2|ttf|otf)",
       "headers": [
         {
           "key": "cache-control",
