@@ -12,7 +12,9 @@ export async function POST(request: NextRequest) {
   try {
     // Check if API key exists
     if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set in environment variables')
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('RESEND_API_KEY is not set in environment variables')
+      }
       return NextResponse.json(
         { error: 'Server configuration error: RESEND_API_KEY not found. Please add it to .env.local' },
         { status: 500 }
@@ -96,7 +98,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email to admin (mahimhr01@gmail.com)
-    console.log('Sending admin email with Resend...')
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Sending admin email with Resend...')
+    }
     const adminEmailResult = await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: 'maste1432ra@gmail.com',
@@ -105,7 +109,9 @@ export async function POST(request: NextRequest) {
       html: adminHtml,
     })
 
-    console.log('Admin email result:', adminEmailResult)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Admin email result:', adminEmailResult)
+    }
 
     if (adminEmailResult.error) {
       throw new Error(`Admin email failed: ${adminEmailResult.error.message}`)
@@ -121,7 +127,9 @@ export async function POST(request: NextRequest) {
       })
 
       if (userEmailResult.error) {
-        console.warn(`User confirmation email failed: ${userEmailResult.error.message}`)
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`User confirmation email failed: ${userEmailResult.error.message}`)
+        }
         // Don't fail the whole request if confirmation email fails
       }
     }
@@ -135,11 +143,15 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
-    console.error('Email API error:', error)
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Email API error:', error)
+    }
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Error details:', errorMessage)
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Error details:', errorMessage)
+    }
     return NextResponse.json(
-      { error: 'Failed to send email', details: errorMessage },
+      { error: 'Failed to send email', details: process.env.NODE_ENV === 'production' ? 'Server error' : errorMessage },
       { status: 500 }
     )
   }
