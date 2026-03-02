@@ -14,15 +14,15 @@ export function HeroSection() {
       {/* Background Image - Optimized */}
       <div className="absolute inset-0">
         <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/u3195299943_une_vue_sur_lespace_toil_--ar_11_--sref_httpss.mj_f1cd1575-c301-46fa-8b30-665ae1ab22a0_3_bloom_subtle_6x.png-EslKdscYhdWOUeP4RBajclEejxh8iO.jpeg"
-          alt="Design furniture for spaces that breathe"
-          fill
-          className="object-cover"
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          quality={75}
-          loading="eager"
+           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/u3195299943_une_vue_sur_lespace_toil_--ar_11_--sref_httpss.mj_f1cd1575-c301-46fa-8b30-665ae1ab22a0_3_bloom_subtle_6x.png-EslKdscYhdWOUeP4RBajclEejxh8iO.jpeg"
+           alt="Design furniture for spaces that breathe"
+           fill
+           className="object-cover"
+           priority
+           fetchPriority="high"
+           sizes="100vw"
+           quality={50}
+           loading="eager"
         />
         <div className="absolute inset-0 bg-black/20" />
       </div>

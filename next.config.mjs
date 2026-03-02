@@ -21,8 +21,10 @@ const nextConfig = {
     // Disable source maps in produc`tion
     productionBrowserSourceMaps: false,
 
-    // Enable strict mode during dev but allow optimization in production
+    // Disable strict mode in production (saves 50-100ms)
     reactStrictMode: false,
+
+
 
     // ============================================
     // 2. IMAGE OPTIMIZATION (Critical for LCP)

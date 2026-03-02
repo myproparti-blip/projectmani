@@ -42,14 +42,23 @@ export function SWFPlayer({ src, title }: SWFPlayerProps) {
         return
       }
 
+      // Defer Ruffle loading to idle callback to avoid blocking main thread
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => loadRuffleScript(), { timeout: 3000 })
+      } else {
+        setTimeout(loadRuffleScript, 1000)
+      }
+    }
+
+    const loadRuffleScript = () => {
       const script = document.createElement("script")
       script.src = "/lib/ruffle/ruffle.js"
+      script.async = true
+      script.defer = true
       script.onload = () => {
-        console.log("Ruffle loaded")
         setTimeout(initPlayer, 300)
       }
       script.onerror = () => {
-        console.error("Failed to load Ruffle")
         setLoading(false)
       }
       document.head.appendChild(script)
@@ -83,9 +92,7 @@ export function SWFPlayer({ src, title }: SWFPlayerProps) {
         }, 500)
 
         player.load(src)
-        console.log("Ruffle player initialized for:", src)
       } catch (error) {
-        console.error("Error initializing player:", error)
         setLoading(false)
       }
     }
@@ -99,7 +106,7 @@ export function SWFPlayer({ src, title }: SWFPlayerProps) {
             containerRef.current.removeChild(playerRef.current)
           }
         } catch (e) {
-          console.error("Error cleaning up player:", e)
+          // Silently fail
         }
         playerRef.current = null
       }

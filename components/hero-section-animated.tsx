@@ -36,7 +36,7 @@ export default function AnimatedHeroSection() {
           className="object-cover"
           priority
           sizes="100vw"
-          quality={75}
+          quality={50}
           loading="eager"
         />
         <div className="absolute inset-0 bg-black/20" />
