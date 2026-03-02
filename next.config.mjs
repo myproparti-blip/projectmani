@@ -87,11 +87,11 @@ const nextConfig = {
                 sideEffects: false,
                 splitChunks: {
                     chunks: 'all',
-                    maxAsyncRequests: 30,
-                    maxInitialRequests: 25,
-                    minSize: 25000,
-                    // Aggressive max size to reduce TBT
-                    maxSize: 180000,
+                    maxAsyncRequests: 25,
+                    maxInitialRequests: 20,
+                    minSize: 30000,
+                    // Reduced max size to reduce TBT
+                    maxSize: 120000,
                     cacheGroups: {
                         // Heavy animation library - lazy load
                         framer: {
@@ -100,7 +100,7 @@ const nextConfig = {
                             priority: 25,
                             reuseExistingChunk: true,
                             enforce: true,
-                            maxSize: 150000,
+                            maxSize: 100000,
                         },
                         // Icon library - lazy load
                         lucide: {
@@ -109,7 +109,7 @@ const nextConfig = {
                             priority: 24,
                             reuseExistingChunk: true,
                             enforce: true,
-                            maxSize: 80000,
+                            maxSize: 60000,
                         },
                         // Charts library - lazy load
                         recharts: {
@@ -118,7 +118,7 @@ const nextConfig = {
                             priority: 23,
                             reuseExistingChunk: true,
                             enforce: true,
-                            maxSize: 120000,
+                            maxSize: 100000,
                         },
                         // Radix UI components - split further
                         radix: {
@@ -127,7 +127,7 @@ const nextConfig = {
                             priority: 22,
                             reuseExistingChunk: true,
                             enforce: true,
-                            maxSize: 120000,
+                            maxSize: 100000,
                         },
                         // React runtime
                         react: {
@@ -135,7 +135,7 @@ const nextConfig = {
                             name: 'react-vendor',
                             priority: 21,
                             reuseExistingChunk: true,
-                            maxSize: 150000,
+                            maxSize: 120000,
                         },
                         // All other vendors
                         vendor: {
@@ -143,8 +143,8 @@ const nextConfig = {
                             name: 'vendor-libs',
                             priority: 10,
                             reuseExistingChunk: true,
-                            minSize: 25000,
-                            maxSize: 180000,
+                            minSize: 30000,
+                            maxSize: 120000,
                         },
                     },
                 },
@@ -167,7 +167,7 @@ const nextConfig = {
             headers: [
                 {
                     key: 'Cache-Control',
-                    value: 'public, max-age=3600, stale-while-revalidate=86400'
+                    value: 'public, max-age=7200, stale-while-revalidate=604800'
                 },
                 {
                     key: 'X-Content-Type-Options',

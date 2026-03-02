@@ -260,3 +260,66 @@
     border: 2px solid rgba(0, 0, 0, 0.8);
   }
 }
+
+/* TBT Optimization - Minimal repaints */
+@layer utilities {
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  .will-change-auto {
+    will-change: auto;
+  }
+
+  .will-change-contents {
+    will-change: contents;
+  }
+
+  /* Optimize text rendering */
+  .text-optimize {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Reduce paint area on scroll */
+  .contain-layout {
+    contain: layout style paint;
+  }
+
+  /* GPU acceleration for critical elements */
+  .gpu-accel {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+/* Optimize transitions to reduce TBT */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Optimize large lists and grids */
+.virtual-scroll {
+  contain: strict;
+  content-visibility: auto;
+}
+
+/* Force GPU acceleration for animations */
+.animate-in,
+.animate-out {
+  transform: translateZ(0);
+}
+
+/* Reduce transition performance cost */
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}

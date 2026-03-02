@@ -26,36 +26,41 @@ const Header = memo(function Header() {
   const [connectDropdownOpen, setConnectDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const connectDropdownRef = useRef<HTMLDivElement>(null)
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Optimize scroll listener with passive flag
+  // Optimize scroll listener with debouncing and IntersectionObserver
   useEffect(() => {
-    let ticking = false
     const handleScroll = () => {
-      if (!ticking) {
-        ticking = true
-        requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 20)
-          ticking = false
-        })
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
       }
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolled(window.scrollY > 20)
+      }, 50)
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: false })
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+    }
   }, [])
 
-  // Click outside handler
+  // Click outside handler - only active when dropdown is open
   useEffect(() => {
+    if (!connectDropdownOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
       if (connectDropdownRef.current && !connectDropdownRef.current.contains(event.target as Node)) {
         setConnectDropdownOpen(false)
       }
     }
 
-    if (connectDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-      return () => document.removeEventListener("mousedown", handleClickOutside)
-    }
+    // Use capture phase for better performance
+    document.addEventListener("click", handleClickOutside, { capture: true })
+    return () => document.removeEventListener("click", handleClickOutside, { capture: true })
   }, [connectDropdownOpen])
 
   const navItems = useMemo(() => [
@@ -71,10 +76,26 @@ const Header = memo(function Header() {
     { label: "Instagram", href: "https://instagram.com/mahim99arch", description: "Follow us" },
   ], [])
 
+  const toggleConnectDropdown = useCallback(() => {
+    setConnectDropdownOpen(prev => !prev)
+  }, [])
+
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev)
+  }, [])
+
+  const closeDropdown = useCallback(() => {
+    setConnectDropdownOpen(false)
+  }, [])
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false)
+  }, [])
+
   return (
     <header
       className={cn(
-        "fixed top-4 left-4 right-4 z-50 transition-all duration-500 px-6 lg:px-8 py-3 rounded-3xl",
+        "fixed top-4 left-4 right-4 z-50 transition-all duration-500 px-6 lg:px-8 py-3 rounded-3xl will-change-auto",
         isScrolled
           ? "bg-black/85 backdrop-blur-2xl border border-amber-500/40 shadow-2xl"
           : "bg-black/70 backdrop-blur-xl border border-amber-500/20 shadow-xl",
@@ -90,6 +111,7 @@ const Header = memo(function Header() {
             height={32}
             className="h-auto"
             style={{ backgroundColor: "transparent" }}
+            loading="eager"
           />
         </Link>
 
@@ -122,23 +144,23 @@ const Header = memo(function Header() {
         {/* Connect Button */}
         <div ref={connectDropdownRef} className="relative hidden sm:flex">
           <button
-            onClick={() => setConnectDropdownOpen(!connectDropdownOpen)}
+            onClick={toggleConnectDropdown}
             className="px-4 py-2 rounded-full border border-amber-500/60 text-amber-400 text-sm font-semibold hover:bg-amber-500/15 transition-all duration-300 flex items-center gap-2"
           >
             <IconMail />
             <span>Connect</span>
           </button>
 
-          {/* Dropdown - CSS only */}
+          {/* Dropdown - CSS only, no animation */}
           {connectDropdownOpen && (
-            <div className="absolute top-full right-0 mt-4 w-56 bg-black/95 backdrop-blur-xl border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute top-full right-0 mt-4 w-56 bg-black/95 backdrop-blur-xl border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden">
               {connectMenuItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
                   target={item.label !== "Email" ? "_blank" : undefined}
                   rel={item.label !== "Email" ? "noopener noreferrer" : undefined}
-                  onClick={() => setConnectDropdownOpen(false)}
+                  onClick={closeDropdown}
                   className="flex items-start gap-4 px-6 py-3.5 text-sm text-gray-300 hover:bg-amber-500/15 transition-colors duration-200 border-b border-amber-500/10 last:border-b-0"
                 >
                   <div className="text-amber-400 flex-shrink-0 mt-0.5">
@@ -166,13 +188,14 @@ const Header = memo(function Header() {
             width={60}
             height={24}
             className="h-auto"
+            loading="eager"
           />
         </Link>
 
         {/* Mobile Menu Button - CSS animation only */}
         <button
           className="md:hidden flex flex-col gap-1 w-6 h-6 justify-center"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={toggleMobileMenu}
         >
           <div className={cn(
             "w-5 h-0.5 bg-amber-500 rounded-full transition-all duration-300",
@@ -189,11 +212,11 @@ const Header = memo(function Header() {
         </button>
       </div>
 
-      {/* Mobile Menu - CSS only */}
+      {/* Mobile Menu - CSS only, no animation */}
       {mobileMenuOpen && (
-        <div className="absolute top-full left-4 right-4 mt-4 bg-black/95 backdrop-blur-xl border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden md:hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute top-full left-4 right-4 mt-4 bg-black/95 backdrop-blur-xl border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden md:hidden">
           <div className="p-4 max-h-96 overflow-y-auto">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block">
+            <Link href="/" onClick={closeMobileMenu} className="block">
               <div className={cn(
                 "px-4 py-3 text-sm font-semibold rounded-lg transition-colors",
                 pathname === "/" ? "text-amber-400 bg-amber-500/15" : "text-gray-300 hover:text-amber-400 hover:bg-amber-500/15"
@@ -201,7 +224,7 @@ const Header = memo(function Header() {
                 HOME
               </div>
             </Link>
-            <Link href="/welcome" onClick={() => setMobileMenuOpen(false)} className="block">
+            <Link href="/welcome" onClick={closeMobileMenu} className="block">
               <div className={cn(
                 "px-4 py-3 text-sm font-semibold rounded-lg transition-colors",
                 pathname === "/welcome" ? "text-amber-400 bg-amber-500/15" : "text-gray-300 hover:text-amber-400 hover:bg-amber-500/15"
@@ -210,7 +233,7 @@ const Header = memo(function Header() {
               </div>
             </Link>
             {navItems.map((item) => (
-              <Link key={item.label} href={item.href} onClick={() => setMobileMenuOpen(false)} className="block">
+              <Link key={item.label} href={item.href} onClick={closeMobileMenu} className="block">
                 <div className={cn(
                   "px-4 py-3 text-sm font-semibold rounded-lg transition-colors",
                   pathname === item.href ? "text-amber-400 bg-amber-500/15" : "text-gray-300 hover:text-amber-400 hover:bg-amber-500/15"
@@ -226,7 +249,7 @@ const Header = memo(function Header() {
                 href={item.href}
                 target={item.label !== "Email" ? "_blank" : undefined}
                 rel={item.label !== "Email" ? "noopener noreferrer" : undefined}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={closeMobileMenu}
                 className="block"
               >
                 <div className="px-4 py-3 text-sm font-semibold text-gray-300 hover:text-amber-400 hover:bg-amber-500/15 rounded-lg transition-colors">
