@@ -261,11 +261,16 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
         <meta name="mobile-web-app-capable" content="yes" />
 
-        {/* Preconnect & DNS prefetch */}
+        {/* Preconnect for fonts - Critical for LCP */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* DNS prefetch for third-party services */}
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        
+        {/* Resource hints for external assets */}
+        <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" as="style" />
       </head>
       <body className="font-sans bg-neutral-50 text-neutral-900 overflow-x-hidden">
         <script
