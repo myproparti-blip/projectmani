@@ -7,10 +7,32 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
+  // ============================================
+  // 1. CORE NEXT.JS OPTIMIZATIONS
+  // ============================================
   
-  // Image Optimization (Critical for LCP & Performance)
+  // SWC Minification (faster & better than Terser)
+  swcMinify: true,
+
+  // Compression (gzip/brotli at server level)
+  compress: true,
+
+  // Remove powered-by header
+  poweredByHeader: false,
+
+  // Disable source maps in production
+  productionBrowserSourceMaps: false,
+
+  // Enable strict mode during dev but allow optimization in production
+  reactStrictMode: true,
+
+  // ============================================
+  // 2. IMAGE OPTIMIZATION (Critical for LCP)
+  // ============================================
   images: {
     unoptimized: false,
+    // Modern formats for all browsers
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -28,38 +50,35 @@ const nextConfig = {
         hostname: "**.unsplash.com",
       },
     ],
+    // 1-year cache for optimized images
     minimumCacheTTL: 60 * 60 * 24 * 365,
     dangerouslyAllowSVG: false,
   },
 
-  // Compression & Security Headers
-  compress: true,
-  poweredByHeader: false,
-  productionBrowserSourceMaps: false,
-  
-  // Disable strict mode in production (reduces unnecessary renders)
-  reactStrictMode: false,
-
-  // SWC Minification (faster & better than Terser)
-  swcMinify: true,
-
-  // Advanced Next.js Optimizations
+  // ============================================
+  // 3. ADVANCED OPTIMIZATIONS
+  // ============================================
   experimental: {
-    // Reduce bundle size by optimizing imports
+    // Tree-shake unused exports
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-accordion',
       '@radix-ui/react-select',
+      'recharts',
     ],
-    // CSS optimization
+    // Optimize CSS output
     optimizeCss: true,
-    // Experimental client bundle optimization
+    // Reduce client bundle
     optimizeClientBundles: true,
+    // Optimize unused CSS
+    optimizeClientBundlePrefetching: true,
   },
 
-  // Advanced Webpack Configuration for Code Splitting
+  // ============================================
+  // 4. CODE SPLITTING & BUNDLE OPTIMIZATION
+  // ============================================
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.optimization = {
@@ -72,22 +91,32 @@ const nextConfig = {
           maxAsyncRequests: 25,
           maxInitialRequests: 20,
           minSize: 20000,
-          maxSize: 240000,
+          // Strict max size to reduce initial payload
+          maxSize: 220000,
           cacheGroups: {
-            // Framer Motion (largest animation lib)
+            // Heavy animation library
             framer: {
               test: /[\\/]node_modules[\\/](framer-motion)[\\/]/,
-              name: 'framer-motion',
+              name: 'framer-motion-chunk',
               priority: 25,
               reuseExistingChunk: true,
               enforce: true,
-              maxSize: 200000,
+              maxSize: 180000,
             },
             // Icon library
             lucide: {
               test: /[\\/]node_modules[\\/](lucide-react)[\\/]/,
-              name: 'lucide-icons',
+              name: 'lucide-chunk',
               priority: 24,
+              reuseExistingChunk: true,
+              enforce: true,
+              maxSize: 120000,
+            },
+            // Charts library
+            recharts: {
+              test: /[\\/]node_modules[\\/](recharts)[\\/]/,
+              name: 'recharts-chunk',
+              priority: 23,
               reuseExistingChunk: true,
               enforce: true,
               maxSize: 150000,
@@ -95,47 +124,71 @@ const nextConfig = {
             // Radix UI components
             radix: {
               test: /[\\/]node_modules[\\/](@radix-ui)[\\/]/,
-              name: 'radix-ui',
-              priority: 23,
+              name: 'radix-ui-chunk',
+              priority: 22,
               reuseExistingChunk: true,
               enforce: true,
-              maxSize: 180000,
+              maxSize: 160000,
             },
             // React runtime
             react: {
               test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
               name: 'react-vendor',
-              priority: 22,
+              priority: 21,
               reuseExistingChunk: true,
-              maxSize: 200000,
+              maxSize: 180000,
             },
-            // Other vendor libs
+            // All other vendors
             vendor: {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendor-libs',
               priority: 10,
               reuseExistingChunk: true,
-              minSize: 0,
+              minSize: 20000,
               maxSize: 200000,
             },
           },
         },
+        // Separate runtime chunk for caching
         runtimeChunk: {
-          name: 'runtime',
+          name: 'webpack-runtime',
         },
       }
     }
     return config
   },
 
-  // Cache Headers for Production (Critical for FCP & LCP)
+  // ============================================
+  // 5. CACHING HEADERS (Critical for Performance)
+  // ============================================
   headers: async () => [
+    // HTML pages - Cache but revalidate frequently
+    {
+      source: '/:path*',
+      has: [
+        {
+          type: 'filetype',
+          filetype: ['html'],
+        },
+      ],
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
+        },
+        {
+          key: 'X-Content-Type-Options',
+          value: 'nosniff'
+        },
+      ]
+    },
+    // All routes default caching
     {
       source: '/:path*',
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, max-age=3600, stale-while-revalidate=86400, immutable'
+          value: 'public, max-age=3600, stale-while-revalidate=86400'
         },
         {
           key: 'X-Content-Type-Options',
@@ -156,6 +209,11 @@ const nextConfig = {
         {
           key: 'Permissions-Policy',
           value: 'camera=(), microphone=(), geolocation=()'
+        },
+        // Enable brotli compression
+        {
+          key: 'Accept-Encoding',
+          value: 'br, gzip'
         }
       ]
     },
@@ -173,7 +231,7 @@ const nextConfig = {
         }
       ]
     },
-    // Cache Next.js static assets forever
+    // Next.js static assets forever
     {
       source: '/_next/static/:path*',
       headers: [
@@ -183,7 +241,7 @@ const nextConfig = {
         }
       ]
     },
-    // Fonts caching
+    // Font caching (1 year)
     {
       source: '/fonts/:path*',
       headers: [
@@ -192,17 +250,48 @@ const nextConfig = {
           value: 'public, max-age=31536000, immutable'
         }
       ]
+    },
+    // API route caching
+    {
+      source: '/api/:path*',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=60, stale-while-revalidate=3600'
+        }
+      ]
     }
   ],
 
-  // Reduce on-demand entries (faster builds)
+  // ============================================
+  // 6. BUILD OPTIMIZATION
+  // ============================================
+  
+  // Reduce on-demand entries
   onDemandEntries: {
     maxInactiveAge: 60 * 1000,
     pagesBufferLength: 3,
   },
 
-  // Output tracing for serverless
+  // Output tracing for serverless optimization
   outputFileTracing: true,
+
+  // ============================================
+  // 7. REDIRECTS & REWRITES FOR PERFORMANCE
+  // ============================================
+  
+  rewrites: async () => ({
+    beforeFiles: [],
+    afterFiles: [],
+    fallback: [],
+  }),
+
+  // ============================================
+  // 8. VERCEL DEPLOYMENT OPTIMIZATIONS
+  // ============================================
+  
+  // Optimize for Vercel deployment
+  staticPageGenerationTimeout: 60,
 }
 
 export default nextConfig

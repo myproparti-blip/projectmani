@@ -12,6 +12,8 @@ const inter = Inter({
   display: "swap",
   variable: "--font-inter",
   preload: true,
+  weight: ['400', '600', '700'], // Load only required weights
+  fallback: ['system-ui', 'arial'],
 })
 
 export const metadata: Metadata = {
@@ -285,14 +287,14 @@ export default function RootLayout({
         {children}
         <FloatingActionButton />
 
-        {/* Google Analytics - Deferred */}
+        {/* Google Analytics - Deferred to lazyOnload for better performance */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-TBCDEF9XYZ"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         <Script
           id="google-analytics"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -305,10 +307,10 @@ export default function RootLayout({
           }}
         />
 
-        {/* Google Tag Manager - Deferred */}
+        {/* Google Tag Manager - Deferred to lazyOnload */}
         <Script
           id="google-tag-manager"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -320,10 +322,10 @@ export default function RootLayout({
           }}
         />
 
-        {/* Vercel Analytics - Deferred */}
+        {/* Vercel Analytics - Deferred to lazyOnload for minimal impact */}
         <Script
           src="https://cdn.vercel-insights.com/v1/script.js"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
       </body>
     </html>
