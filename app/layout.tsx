@@ -293,14 +293,15 @@ export default function RootLayout({
         {children}
         <FloatingActionButton />
 
-        {/* Google Analytics - Deferred to lazyOnload for better performance */}
+        {/* Google Analytics - Loaded after user interaction for optimal performance */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-TBCDEF9XYZ"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
+          async
         />
         <Script
           id="google-analytics"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -308,30 +309,17 @@ export default function RootLayout({
               gtag('js', new Date());
               gtag('config', 'G-TBCDEF9XYZ', {
                 page_path: window.location.pathname,
+                anonymize_ip: true,
               });
             `,
           }}
         />
 
-        {/* Google Tag Manager - Deferred to lazyOnload */}
-        <Script
-          id="google-tag-manager"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.initialization'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','GTM-AB12CD34EF');
-            `,
-          }}
-        />
-
-        {/* Vercel Analytics - Deferred to lazyOnload for minimal impact */}
+        {/* Vercel Analytics - Deferred for minimal impact */}
         <Script
           src="https://cdn.vercel-insights.com/v1/script.js"
           strategy="lazyOnload"
+          async
         />
       </body>
     </html>

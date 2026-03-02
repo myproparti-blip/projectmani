@@ -1,5 +1,5 @@
+/* Critical CSS only - minimize bundle size */
 @import "tailwindcss";
-@import "tw-animate-css";
 
 :root {
   --background: oklch(1 0 0);
@@ -331,30 +331,9 @@
   }
 }
 
-/* Optimize font loading to avoid layout shift */
-@font-face {
-  font-family: 'Inter';
-  src: url('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTTG-cp0H6A.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTTG-cp0H6A.woff2') format('woff2');
-  font-weight: 600;
-  font-display: swap;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTTG-cp0H6A.woff2') format('woff2');
-  font-weight: 700;
-  font-display: swap;
-  font-style: normal;
-}
+/* Font loading - using CSS from Google Fonts with swap strategy */
+/* Fonts are preloaded in layout.tsx with swap display */
+/* This ensures no FOUT/FOIT issues while maintaining performance */
 
 /* Minimize CLS (Cumulative Layout Shift) */
 body {
