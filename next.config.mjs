@@ -18,7 +18,7 @@ const nextConfig = {
     // Remove powered-by header
     poweredByHeader: false,
 
-    // Disable source maps in production
+    // Disable source maps in produc`tion
     productionBrowserSourceMaps: false,
 
     // Enable strict mode during dev but allow optimization in production
